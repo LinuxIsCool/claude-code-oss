@@ -26,6 +26,7 @@ import {
   writeFileLines,
 } from './shellConfig.js'
 import { jsonParse } from './slowOperations.js'
+import { isEnvTruthy } from './envUtils.js'
 
 const GCS_BUCKET_URL =
   'https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases'
@@ -68,7 +69,12 @@ export type MaxVersionConfig = {
  * This approach keeps version comparison logic simple while maintaining traceability via the SHA.
  */
 export async function assertMinVersion(): Promise<void> {
-  if (process.env.NODE_ENV === 'test') {
+  if (
+    process.env.NODE_ENV === 'test' ||
+    isEnvTruthy(process.env.CLAUDE_CODE_SKIP_UPDATE_CHECK) ||
+    MACRO.VERSION.includes('private') ||
+    MACRO.VERSION.includes('leaked')
+  ) {
     return
   }
 
