@@ -175,6 +175,8 @@ const buildOptions: esbuild.BuildOptions = {
     'fsevents',
     'sharp',
     'image-processor-napi',
+    '@anthropic-ai/sdk',
+    '@anthropic-ai/sdk/*',
     '@anthropic-ai/claude-agent-sdk',
     '@anthropic-ai/bedrock-sdk',
     '@anthropic-ai/foundry-sdk',
@@ -220,7 +222,10 @@ const buildOptions: esbuild.BuildOptions = {
     'process.env.NODE_ENV': minify ? '"production"' : '"development"',
   },
   banner: {
-    js: '#!/usr/bin/env node\n',
+    js:
+      '#!/usr/bin/env node\n' +
+      'import { createRequire as __createRequire } from "node:module";\n' +
+      'const require = __createRequire(import.meta.url);\n',
   },
   resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
   logLevel: 'info',
