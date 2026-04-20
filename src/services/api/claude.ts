@@ -249,6 +249,11 @@ import {
   recordPromptState,
 } from './promptCacheBreakDetection.js'
 import {
+  convertMessagesToTextToolShim,
+  TEXT_TOOL_SHIM_SYSTEM_PROMPT,
+  usesTextToolShim,
+} from './textToolShim.js'
+import {
   CannotRetryError,
   FallbackTriggeredError,
   is529Error,
@@ -1314,6 +1319,10 @@ async function* queryModel(
     API_MAX_MEDIA_PER_REQUEST,
   )
 
+  if (usesTextToolShim(options.model)) {
+    messagesForAPI = convertMessagesToTextToolShim(messagesForAPI, filteredTools)
+  }
+
   // Instrumentation: Track message count after normalization
   logEvent('tengu_api_after_normalize', {
     postNormalizedMessageCount: messagesForAPI.length,
@@ -1363,6 +1372,7 @@ async function* queryModel(
         hasAppendSystemPrompt: options.hasAppendSystemPrompt,
       }),
       ...systemPrompt,
+      ...(usesTextToolShim(options.model) ? [TEXT_TOOL_SHIM_SYSTEM_PROMPT] : []),
       ...(advisorModel ? [ADVISOR_TOOL_INSTRUCTIONS] : []),
       ...(injectChromeHere ? [CHROME_TOOL_SEARCH_INSTRUCTIONS] : []),
     ].filter(Boolean),

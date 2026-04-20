@@ -14,27 +14,75 @@ if [[ -f "${SECRETS_FILE}" ]]; then
   set +a
 fi
 
-if [[ -z "${TELUS_BASE_URL:-}" && -n "${TELUS_GPT_OSS_URL:-}" ]]; then
-  export TELUS_BASE_URL="${TELUS_GPT_OSS_URL}"
-fi
+normalize_base_url() {
+  local raw="${1:-}"
+  raw="${raw%/}"
+  raw="${raw%/v1/messages}"
+  raw="${raw%/v1/chat/completions}"
+  raw="${raw%/v1/completions}"
+  raw="${raw%/v1}"
+  printf '%s\n' "${raw}"
+}
 
-if [[ -z "${TELUS_AUTH_TOKEN:-}" && -n "${TELUS_GPT_OSS_KEY:-}" ]]; then
-  export TELUS_AUTH_TOKEN="${TELUS_GPT_OSS_KEY}"
-fi
+detect_requested_model() {
+  local previous=""
+  for arg in "$@"; do
+    if [[ "${previous}" == "--model" ]]; then
+      printf '%s\n' "${arg}"
+      return 0
+    fi
+    case "${arg}" in
+      --model=*)
+        printf '%s\n' "${arg#--model=}"
+        return 0
+        ;;
+    esac
+    previous="${arg}"
+  done
+  printf '%s\n' "${MODEL}"
+}
+
+configure_model_env() {
+  local requested="$1"
+  case "${requested}" in
+    telus:gpt-oss-120b|gpt-oss:120b|gpt-oss-120b|gptoss)
+      export TELUS_BASE_URL="${TELUS_BASE_URL:-${TELUS_GPT_OSS_URL:-}}"
+      export TELUS_AUTH_TOKEN="${TELUS_AUTH_TOKEN:-${TELUS_GPT_OSS_KEY:-}}"
+      export TELUS_MODEL="telus:gpt-oss-120b"
+      ;;
+    telus:mistral-small-3.2|mistral-small-3.2|mistral)
+      export TELUS_BASE_URL="${TELUS_BASE_URL:-${TELUS_MISTRAL_URL:-}}"
+      export TELUS_AUTH_TOKEN="${TELUS_AUTH_TOKEN:-${TELUS_MISTRAL_KEY:-}}"
+      export TELUS_MODEL="telus:mistral-small-3.2"
+      ;;
+    telus:gemma-3-27b|gemma-3-27b|gemma)
+      export TELUS_BASE_URL="${TELUS_BASE_URL:-${TELUS_GEMMA_URL:-}}"
+      export TELUS_AUTH_TOKEN="${TELUS_AUTH_TOKEN:-${TELUS_GEMMA_KEY:-}}"
+      export TELUS_MODEL="telus:gemma-3-27b"
+      ;;
+    *)
+      export TELUS_BASE_URL="${TELUS_BASE_URL:-${TELUS_GPT_OSS_URL:-}}"
+      export TELUS_AUTH_TOKEN="${TELUS_AUTH_TOKEN:-${TELUS_GPT_OSS_KEY:-}}"
+      ;;
+  esac
+}
+
+REQUESTED_MODEL="$(detect_requested_model "$@")"
+configure_model_env "${REQUESTED_MODEL}"
 
 if [[ -z "${TELUS_BASE_URL:-}" ]]; then
-  echo "TELUS_BASE_URL is required (or define TELUS_GPT_OSS_URL in ${SECRETS_FILE})" >&2
+  echo "TELUS_BASE_URL is required for model ${REQUESTED_MODEL} (check ${SECRETS_FILE})" >&2
   exit 1
 fi
 
 if [[ -z "${TELUS_AUTH_TOKEN:-}" ]]; then
-  echo "TELUS_AUTH_TOKEN is required (or define TELUS_GPT_OSS_KEY in ${SECRETS_FILE})" >&2
+  echo "TELUS_AUTH_TOKEN is required for model ${REQUESTED_MODEL} (check ${SECRETS_FILE})" >&2
   exit 1
 fi
 
-export ANTHROPIC_BASE_URL="${TELUS_BASE_URL}"
+export ANTHROPIC_BASE_URL="$(normalize_base_url "${TELUS_BASE_URL}")"
 export ANTHROPIC_AUTH_TOKEN="${TELUS_AUTH_TOKEN}"
-export ANTHROPIC_MODEL="${MODEL}"
+export ANTHROPIC_MODEL="${REQUESTED_MODEL}"
 export CLAUDE_CODE_SKIP_UPDATE_CHECK="${CLAUDE_CODE_SKIP_UPDATE_CHECK:-1}"
 export CLAUDE_CONFIG_DIR="${CLAUDE_CONFIG_DIR:-$CONFIG_DIR_DEFAULT}"
 

@@ -12,6 +12,7 @@ import type { AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS } from 
 import { logEvent } from './analytics/index.js'
 import { getAPIMetadata } from './api/claude.js'
 import { getAnthropicClient } from './api/client.js'
+import { toHeaders } from './api/headerUtils.js'
 import {
   processRateLimitHeaders,
   shouldProcessRateLimits,
@@ -495,8 +496,9 @@ export function extractQuotaStatusFromError(error: APIError): void {
   try {
     let newLimits = { ...currentLimits }
     if (error.headers) {
+      const normalizedHeaders = toHeaders(error.headers)
       // Process headers (applies mocks from /mock-limits command if active)
-      const headersToUse = processRateLimitHeaders(error.headers)
+      const headersToUse = processRateLimitHeaders(normalizedHeaders)
       rawUtilization = extractRawUtilization(headersToUse)
       newLimits = computeNewLimitsFromHeaders(headersToUse)
 

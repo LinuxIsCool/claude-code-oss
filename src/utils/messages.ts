@@ -36,6 +36,7 @@ import {
   getPdfTooLargeErrorMessage,
   getRequestTooLargeErrorMessage,
 } from '../services/api/errors.js'
+import { parseTextToolCallsFromAPI } from '../services/api/textToolShim.js'
 import type { AnyObject, Progress } from '../Tool.js'
 import { isConnectorTextBlock } from '../types/connectorText.js'
 import type {
@@ -2656,7 +2657,12 @@ export function normalizeContentFromAPI(
   if (!contentBlocks) {
     return []
   }
-  return contentBlocks.map(contentBlock => {
+  const parsedTextToolCalls = parseTextToolCallsFromAPI(
+    contentBlocks,
+    tools,
+    agentId,
+  )
+  return parsedTextToolCalls.map(contentBlock => {
     switch (contentBlock.type) {
       case 'tool_use': {
         if (

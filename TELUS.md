@@ -52,10 +52,12 @@ claude-code
 ```
 
 If `~/.claude/local/secrets/telus-api.env` exists, the wrapper auto-loads it
-and falls back to:
+and selects backend credentials by requested model:
 
 - `TELUS_GPT_OSS_URL` for `TELUS_BASE_URL`
 - `TELUS_GPT_OSS_KEY` for `TELUS_AUTH_TOKEN`
+- `TELUS_MISTRAL_URL` and `TELUS_MISTRAL_KEY` for `telus:mistral-small-3.2`
+- `TELUS_GEMMA_URL` and `TELUS_GEMMA_KEY` for `telus:gemma-3-27b`
 
 Direct backend smoke test:
 
@@ -65,6 +67,12 @@ export TELUS_AUTH_TOKEN="your-token"
 ./scripts/smoke-telus-gpt-oss.sh
 ```
 
+Mistral shim smoke test:
+
+```bash
+./scripts/smoke-telus-mistral-shim.sh
+```
+
 ## Notes
 
 - The wrapper defaults `CLAUDE_CODE_SKIP_UPDATE_CHECK=1`
@@ -72,6 +80,8 @@ export TELUS_AUTH_TOKEN="your-token"
 - You can override the wrapper model with `TELUS_MODEL`
 - You can override the repo root used by `claude-code` with `CLAUDE_CODE_FORK_ROOT`
 - The smoke script validates the raw `/v1/messages` path independently of Claude Code runtime behavior
+- `scripts/smoke-telus-mistral-shim.sh` validates the two-turn text-tool shim path for TELUS Mistral
 - `ANTHROPIC_BASE_URL` is now passed into the Anthropic SDK client directly
 - TELUS GPT OSS was the historically successful path for native tool-use bring-up
-- TELUS Mistral and Gemma previously required more compatibility work around tool calling
+- TELUS Mistral now uses a provider-boundary text-tool shim for multi-turn tool use
+- TELUS Gemma still needs separate handling because its endpoint rejects native tool declarations outright
