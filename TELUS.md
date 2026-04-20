@@ -44,11 +44,20 @@ Or rely on the wrapper default model:
 ./scripts/run-telus-claude-code
 ```
 
+Direct backend smoke test:
+
+```bash
+export TELUS_BASE_URL="https://your-telus-endpoint.example"
+export TELUS_AUTH_TOKEN="your-token"
+./scripts/smoke-telus-gpt-oss.sh
+```
+
 ## Notes
 
 - The wrapper defaults `CLAUDE_CODE_SKIP_UPDATE_CHECK=1`
 - The wrapper defaults `CLAUDE_CONFIG_DIR` to `~/.claude/claude-code-telus`
 - You can override the wrapper model with `TELUS_MODEL`
+- The smoke script validates the raw `/v1/messages` path independently of Claude Code runtime behavior
 - `ANTHROPIC_BASE_URL` is now passed into the Anthropic SDK client directly
 - TELUS GPT OSS was the historically successful path for native tool-use bring-up
 - TELUS Mistral and Gemma previously required more compatibility work around tool calling
