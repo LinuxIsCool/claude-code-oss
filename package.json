@@ -13,6 +13,7 @@
     "build": "bun scripts/build-bundle.ts",
     "build:watch": "bun scripts/build-bundle.ts --watch",
     "build:prod": "bun scripts/build-bundle.ts --minify",
+    "telus": "bash ./scripts/run-telus-claude-code",
     "typecheck": "tsc --noEmit",
     "lint": "biome check src/ scripts/",
     "lint:fix": "biome check --write src/ scripts/",

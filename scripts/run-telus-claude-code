@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+MODEL="${TELUS_MODEL:-telus:gpt-oss-120b}"
+CONFIG_DIR_DEFAULT="${HOME}/.claude/claude-code-telus"
+
+if [[ -z "${TELUS_BASE_URL:-}" ]]; then
+  echo "TELUS_BASE_URL is required" >&2
+  exit 1
+fi
+
+if [[ -z "${TELUS_AUTH_TOKEN:-}" ]]; then
+  echo "TELUS_AUTH_TOKEN is required" >&2
+  exit 1
+fi
+
+export ANTHROPIC_BASE_URL="${TELUS_BASE_URL}"
+export ANTHROPIC_AUTH_TOKEN="${TELUS_AUTH_TOKEN}"
+export ANTHROPIC_MODEL="${MODEL}"
+export CLAUDE_CODE_SKIP_UPDATE_CHECK="${CLAUDE_CODE_SKIP_UPDATE_CHECK:-1}"
+export CLAUDE_CONFIG_DIR="${CLAUDE_CONFIG_DIR:-$CONFIG_DIR_DEFAULT}"
+
+exec node "$ROOT/dist/cli.mjs" "$@"

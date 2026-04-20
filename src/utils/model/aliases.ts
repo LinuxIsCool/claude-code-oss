@@ -6,6 +6,9 @@ export const MODEL_ALIASES = [
   'sonnet[1m]',
   'opus[1m]',
   'opusplan',
+  'telus:gpt-oss-120b',
+  'telus:mistral-small-3.2',
+  'telus:gemma-3-27b',
 ] as const
 export type ModelAlias = (typeof MODEL_ALIASES)[number]
 

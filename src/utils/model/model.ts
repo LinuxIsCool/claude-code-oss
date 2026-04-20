@@ -465,6 +465,12 @@ export function parseUserSpecifiedModel(
         return getDefaultOpusModel() + (has1mTag ? '[1m]' : '')
       case 'best':
         return getBestModel()
+      case 'telus:gpt-oss-120b':
+        return 'gpt-oss:120b'
+      case 'telus:mistral-small-3.2':
+        return 'mistralai/Mistral-Small-3.2-24B-Instruct-2506'
+      case 'telus:gemma-3-27b':
+        return 'google/gemma-3-27b-it'
       default:
     }
   }
