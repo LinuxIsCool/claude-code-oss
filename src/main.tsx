@@ -3841,10 +3841,8 @@ async function run(): Promise<CommanderCommand> {
   if (feature('KAIROS')) {
     program.addOption(new Option('--assistant', 'Force assistant mode (Agent SDK daemon use)').hideHelp());
   }
-  if (feature('KAIROS') || feature('KAIROS_CHANNELS')) {
-    program.addOption(new Option('--channels <servers...>', 'MCP servers whose channel notifications (inbound push) should register this session. Space-separated server names.').hideHelp());
-    program.addOption(new Option('--dangerously-load-development-channels <servers...>', 'Load channel servers not on the approved allowlist. For local channel development only. Shows a confirmation dialog at startup.').hideHelp());
-  }
+  program.addOption(new Option('--channels <servers...>', 'MCP servers whose channel notifications (inbound push) should register this session. Space-separated server names.').hideHelp());
+  program.addOption(new Option('--dangerously-load-development-channels <servers...>', 'Load channel servers not on the approved allowlist. For local channel development only. Shows a confirmation dialog at startup.').hideHelp());
 
   // Teammate identity options (set by leader when spawning tmux teammates)
   // These replace the CLAUDE_CODE_* environment variables

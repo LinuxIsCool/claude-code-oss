@@ -22,7 +22,7 @@ const FEATURE_FLAGS: Record<string, boolean> = {
   KAIROS: false,
   KAIROS_BRIEF: false,
   KAIROS_GITHUB_WEBHOOKS: false,
-  KAIROS_CHANNELS: false,
+  KAIROS_CHANNELS: true,
   KAIROS_DREAM: false,
   KAIROS_PUSH_NOTIFICATION: false,
   BRIDGE_MODE: false,
