@@ -2,17 +2,33 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SECRETS_FILE="${HOME}/.claude/local/secrets/telus-api.env"
 
 MODEL="${TELUS_MODEL:-telus:gpt-oss-120b}"
 CONFIG_DIR_DEFAULT="${HOME}/.claude/claude-code-telus"
 
+if [[ -f "${SECRETS_FILE}" ]]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "${SECRETS_FILE}"
+  set +a
+fi
+
+if [[ -z "${TELUS_BASE_URL:-}" && -n "${TELUS_GPT_OSS_URL:-}" ]]; then
+  export TELUS_BASE_URL="${TELUS_GPT_OSS_URL}"
+fi
+
+if [[ -z "${TELUS_AUTH_TOKEN:-}" && -n "${TELUS_GPT_OSS_KEY:-}" ]]; then
+  export TELUS_AUTH_TOKEN="${TELUS_GPT_OSS_KEY}"
+fi
+
 if [[ -z "${TELUS_BASE_URL:-}" ]]; then
-  echo "TELUS_BASE_URL is required" >&2
+  echo "TELUS_BASE_URL is required (or define TELUS_GPT_OSS_URL in ${SECRETS_FILE})" >&2
   exit 1
 fi
 
 if [[ -z "${TELUS_AUTH_TOKEN:-}" ]]; then
-  echo "TELUS_AUTH_TOKEN is required" >&2
+  echo "TELUS_AUTH_TOKEN is required (or define TELUS_GPT_OSS_KEY in ${SECRETS_FILE})" >&2
   exit 1
 fi
 

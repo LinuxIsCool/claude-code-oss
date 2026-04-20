@@ -44,6 +44,19 @@ Or rely on the wrapper default model:
 ./scripts/run-telus-claude-code
 ```
 
+For day-to-day use, `~/.local/bin/claude-code` now points at this private fork
+and uses the TELUS wrapper automatically:
+
+```bash
+claude-code
+```
+
+If `~/.claude/local/secrets/telus-api.env` exists, the wrapper auto-loads it
+and falls back to:
+
+- `TELUS_GPT_OSS_URL` for `TELUS_BASE_URL`
+- `TELUS_GPT_OSS_KEY` for `TELUS_AUTH_TOKEN`
+
 Direct backend smoke test:
 
 ```bash
@@ -57,6 +70,7 @@ export TELUS_AUTH_TOKEN="your-token"
 - The wrapper defaults `CLAUDE_CODE_SKIP_UPDATE_CHECK=1`
 - The wrapper defaults `CLAUDE_CONFIG_DIR` to `~/.claude/claude-code-telus`
 - You can override the wrapper model with `TELUS_MODEL`
+- You can override the repo root used by `claude-code` with `CLAUDE_CODE_FORK_ROOT`
 - The smoke script validates the raw `/v1/messages` path independently of Claude Code runtime behavior
 - `ANTHROPIC_BASE_URL` is now passed into the Anthropic SDK client directly
 - TELUS GPT OSS was the historically successful path for native tool-use bring-up
