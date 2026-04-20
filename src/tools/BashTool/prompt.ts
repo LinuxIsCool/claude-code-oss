@@ -2,7 +2,7 @@ import { feature } from 'bun:bundle'
 import { prependBullets } from '../../constants/prompts.js'
 import { getAttributionTexts } from '../../utils/attribution.js'
 import { hasEmbeddedSearchTools } from '../../utils/embeddedTools.js'
-import { isEnvTruthy } from '../../utils/envUtils.js'
+import { isBareMode, isEnvTruthy } from '../../utils/envUtils.js'
 import { shouldIncludeGitInstructions } from '../../utils/gitSettings.js'
 import { getClaudeTempDir } from '../../utils/permissions/filesystem.js'
 import { SandboxManager } from '../../utils/sandbox/sandbox-adapter.js'
@@ -170,6 +170,16 @@ function dedup<T>(arr: T[] | undefined): T[] | undefined {
 }
 
 function getSimpleSandboxSection(): string {
+  // In simple/bare mode the sandbox prompt detail is optional, and this path
+  // is exercised very early in headless startup. Avoid failing prompt
+  // generation if the sandbox adapter is only partially initialized.
+  if (
+    isBareMode() ||
+    typeof SandboxManager.isSandboxingEnabled !== 'function'
+  ) {
+    return ''
+  }
+
   if (!SandboxManager.isSandboxingEnabled()) {
     return ''
   }

@@ -598,7 +598,10 @@ export async function runHeadless(
   // #34044: if user explicitly set sandbox.enabled=true but deps are missing,
   // isSandboxingEnabled() returns false silently. Surface the reason so users
   // know their security config isn't being enforced.
-  const sandboxUnavailableReason = SandboxManager.getSandboxUnavailableReason()
+  const sandboxEnabledInSettings = SandboxManager.isSandboxEnabledInSettings()
+  const sandboxUnavailableReason = sandboxEnabledInSettings
+    ? SandboxManager.getSandboxUnavailableReason()
+    : undefined
   if (sandboxUnavailableReason) {
     if (SandboxManager.isSandboxRequired()) {
       process.stderr.write(
@@ -612,7 +615,10 @@ export async function runHeadless(
       `\n⚠ Sandbox disabled: ${sandboxUnavailableReason}\n` +
         `  Commands will run WITHOUT sandboxing. Network and filesystem restrictions will NOT be enforced.\n\n`,
     )
-  } else if (SandboxManager.isSandboxingEnabled()) {
+  } else if (
+    sandboxEnabledInSettings &&
+    SandboxManager.isSandboxingEnabled()
+  ) {
     // Initialize sandbox with a callback that forwards network permission
     // requests to the SDK host via the can_use_tool control_request protocol.
     // This must happen after structuredIO is created so we can send requests.
@@ -693,7 +699,6 @@ export async function runHeadless(
     sessionStartHooksPromise: options.sessionStartHooksPromise,
     restoredWorkerState: structuredIO.restoredWorkerState,
   })
-
   // SessionStart hooks can emit initialUserMessage — the first user turn for
   // headless orchestrator sessions where stdin is empty and additionalContext
   // alone (an attachment, not a turn) would leave the REPL with nothing to
@@ -1866,7 +1871,6 @@ function runHeadlessStreaming(
     if (running) {
       return
     }
-
     running = true
     runPhase = undefined
     notifySessionStateChanged('running')
